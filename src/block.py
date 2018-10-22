@@ -5,10 +5,6 @@ from struct import pack
 
 import json
 
-from . import BitcoinEncoding, target_unpack, reverse_hash, uint256_from_str
-from .transaction import Transaction
-from .dark import CMasterNodeVote, ser_vector, ser_string
-
 import sys
 if sys.version_info > (3,):
     long = int
