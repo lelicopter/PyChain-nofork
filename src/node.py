@@ -208,7 +208,7 @@ class Node:
     @staticmethod
     def valid_proof(last_proof, proof, last_hash):
         """
-        Validates the Proof
+        Validates the Proof, doesn't suffice valid proof verification yet.
 
         :param last_proof: <int> Previous Proof
         :param proof: <int> Current Proof
@@ -228,8 +228,8 @@ app = Flask(__name__)
 # Generate a globally unique address for this node
 node_identifier = str(uuid4()).replace('-', '')
 
-# Instantiate the Blockchain
-blockchain = Blockchain()
+# Instantiate the Node
+node = Node()
 
 
 @app.route('/mine', methods=['GET'])
@@ -270,7 +270,7 @@ def new_transaction():
         return 'Missing values', 400
 
     # Create a new Transaction
-    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
+    index = node.new_transaction(values['sender'], values['recipient'], values['amount'])
 
     response = {'message': f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
@@ -279,8 +279,8 @@ def new_transaction():
 @app.route('/chain', methods=['GET'])
 def full_chain():
     response = {
-        'chain': blockchain.chain,
-        'length': len(blockchain.chain),
+        'chain': node.chain,
+        'length': len(node.chain),
     }
     return jsonify(response), 200
 
@@ -294,28 +294,28 @@ def register_nodes():
         return "Error: Please supply a valid list of nodes", 400
 
     for node in nodes:
-        blockchain.register_node(node)
+        node.register_node(node)
 
     response = {
         'message': 'New nodes have been added',
-        'total_nodes': list(blockchain.nodes),
+        'total_nodes': list(node.nodes),
     }
     return jsonify(response), 201
 
 
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
-    replaced = blockchain.resolve_conflicts()
+    replaced = node.resolve_conflicts()
 
     if replaced:
         response = {
             'message': 'Our chain was replaced',
-            'new_chain': blockchain.chain
+            'new_chain': node.chain
         }
     else:
         response = {
             'message': 'Our chain is authoritative',
-            'chain': blockchain.chain
+            'chain': node.chain
         }
 
     return jsonify(response), 200
@@ -329,4 +329,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port = args.port
 
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='localhost', port=port)
