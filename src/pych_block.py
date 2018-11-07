@@ -11,10 +11,10 @@ class Block:
 	
 	def __init__(self):
 		self.version = None 
-		
+		self.index = None
 		
 		self.prev_hash = None
-		self.ntime = None
+		self.timestamp = None
 		#should be a list of tx objects
 		self.transactions = None
 		self.total_value = None
@@ -25,6 +25,8 @@ class Block:
 		self._merklebranch = None
 		#Coinbase transaction
 		self.coinbase = None
+		#proof
+		self.proof = None
 		
 		
 		#HASH#
@@ -36,10 +38,10 @@ class Block:
 		def prev_hash_hex(self):
 			return hexlify(self.hashprev)
 			
-		#NTIME#
+		#TIMESTAMP#
 		@property
-		def ntime(self):
-			return self.ntime
+		def timestamp(self):
+			return self.timestamp
 		
 		#VERSION#
 		@property 
@@ -49,3 +51,6 @@ class Block:
 		@property
 		def fee_total(self):
 			return sum([t.fees or 0 for t in self.transactions])
+
+	
+		#TOOD: implement method to jsonify blocks

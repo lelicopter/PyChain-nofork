@@ -23,7 +23,7 @@ import requests
 from flask import Flask, jsonify, request
 
 #PYCHAIN SPECIFIC MODULES
-
+from pych_block import Block
 
 #config variables
 port =""
@@ -134,14 +134,13 @@ class Node:
         :param previous_hash: Hash of previous Block
         :return: New Block
         """
-        #TODO: Mit Block Objekt ersetzen.
-        block = {
-            'index': len(self.chain) + 1,
-            'timestamp': time(),
-            'transactions': self.mempool,
-            'proof': proof,
-            'previous_hash': previous_hash or self.hash(self.chain[-1]),
-        }
+
+        block = Block()
+        block.transactions = self.mempool
+        block.index = len(self.chain)+1
+        block.timestamp = time()
+        block.proof = proof
+        block.prev_hash = previous_hash or self.hash(self.chain[-1])
 
         # Reset the current list of transactions
         self.mempool = []
@@ -164,7 +163,7 @@ class Node:
             'amount': amount,
         })
 
-        return self.last_block['index'] + 1
+        return self.last_block.index + 1
 
     @property
     def last_block(self):
@@ -178,8 +177,8 @@ class Node:
         :param block: Block
         """
 
-        # We must make sure that the Dictionary is Ordered, or we'll have inconsistent hashes
-        block_string = json.dumps(block, sort_keys=True).encode()
+        #Must find a way to make sure that hashes are consistent, need to implement method to jsonify blocks for that
+        block_string = json.dumps(block, sort_keys=True).encode() #obsolete
         return sha3.keccak_384.hexdigest(block_string)
 
     def proof_of_work(self, last_block):
@@ -196,7 +195,7 @@ class Node:
         :return: <int>
         """
 
-        last_proof = last_block['proof']
+        last_proof = last_block.proof
         last_hash = self.hash(last_block)
 
         proof = 0
@@ -235,27 +234,27 @@ node = Node()
 @app.route('/mine', methods=['GET'])
 def mine():
     # We run the proof of work algorithm to get the next proof...
-    last_block = blockchain.last_block
-    proof = blockchain.proof_of_work(last_block)
+    last_block = node.last_block
+    proof = node.proof_of_work(last_block)
 
     # We must receive a reward for finding the proof.
     # The sender is "0" to signify that this node has mined a new coin.
-    blockchain.new_transaction(
+    node.new_transaction(
         sender="0",
         recipient=node_identifier,
         amount=1,
     )
 
     # Forge the new Block by adding it to the chain
-    previous_hash = blockchain.hash(last_block)
-    block = blockchain.new_block(proof, previous_hash)
+    previous_hash = node.hash(last_block)
+    block = node.new_block(proof, previous_hash)
 
     response = {
         'message': "New Block Forged",
-        'index': block['index'],
-        'transactions': block['transactions'],
-        'proof': block['proof'],
-        'previous_hash': block['previous_hash'],
+        'index': block.index,
+        'transactions': block.transactions,
+        'proof': block.proof,
+        'previous_hash': block.prev_hash,
     }
     return jsonify(response), 200
 
