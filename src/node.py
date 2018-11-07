@@ -173,7 +173,7 @@ class Node:
     @staticmethod
     def hash(block):
         """
-        Creates a SHA-256 hash of a Block
+        Creates a Keccak384 hash of a Block
 
         :param block: Block
         """

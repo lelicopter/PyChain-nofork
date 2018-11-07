@@ -1,3 +1,4 @@
+#Contributed by barrystyle, custom implementation of Kimoto Gravity Well
 import os, sys, time
 from util import *
 
